@@ -1,6 +1,7 @@
 const http = require('http');
 const https = require('https');
 const port = 3000;
+const API_KEY = "1dF5EOyJBwwkzS945Njfm3r6ssGHUYZV";
 
 
 function getToken(reqBody,response) {
@@ -10,7 +11,7 @@ function getToken(reqBody,response) {
         path: "/protected/json/phones/verification/start?",
         method: "POST",
         headers: {
-            "X-Authy-API-Key":"1dF5EOyJBwwkzS945Njfm3r6ssGHUYZV",
+            "X-Authy-API-Key":API_KEY,
             "Content-Type":"application/json"
         }
     };
@@ -56,7 +57,7 @@ function verifyToken(reqBody,response) {
         path: "/protected/json/phones/verification/check?phone_number="+reqBody.phone_number+"&country_code=65&verification_code="+reqBody.code,
         method: "GET",
         headers: {
-            "X-Authy-API-Key":"1dF5EOyJBwwkzS945Njfm3r6ssGHUYZV",
+            "X-Authy-API-Key":API_KEY,
         }
     };
 
@@ -83,7 +84,9 @@ function verifyToken(reqBody,response) {
     verRequest.end();
 }
 
-
+/**
+ * Responds to different request comming to server
+ */
 const requestHandler = (request, response) => {
     response.setHeader('Access-Control-Allow-Origin', '*');
   if(request.url.indexOf("requestToken")>0){
@@ -125,6 +128,9 @@ const requestHandler = (request, response) => {
 
 }
 
+/**
+ * Start server on designated port
+ */
 const server = http.createServer(requestHandler)
 
 server.listen(port, (err) => {  
