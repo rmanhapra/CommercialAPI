@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Twilio Login</title>
+    <script>
+    var userInfo = {};
+
+    window.onload = function(){
+        var regSec = document.getElementById("registrationSection");
+        if(regSec){
+            regSec.style.display ='none';
+        }
+    }
+
+    function checkLogin(){
+        var uName = document.getElementById("UserName").value;
+        var pass = document.getElementById("Password").value;
+        if(userInfo.UserName != uName){
+            var info = document.getElementById("newUserInfo");
+            if(info){
+                info.style.color = 'red';
+                info.style.fontWeight = 'bold';
+            }
+        }
+        else if(userInfo.UserName == uName && userInfo.Password == pass){
+            var twofactor = document.getElementById("twoFactorSection");
+            if(twofactor){
+                twofactor.style.display = 'inline';
+            }
+            var loginSec = document.getElementById("loginSection");
+            if(loginSec){
+                loginSec.style.display = 'none';
+            }
+            
+            callTwoFactorEP();
+        }
+    }
+    
+    function register(regTrue){
+        var regSec = document.getElementById("registrationSection");
+        var loginSec = document.getElementById("loginSection");
+        var info = document.getElementById("newUserInfo");
+        if(regSec){
+            if(regTrue){
+                regSec.style.display ='inline';
+            }else{
+                regSec.style.display ='none';
+            }
+
+        }
+        if(loginSec){
+            if(regTrue){
+                loginSec.style.display ='none';
+            }
+            else{
+                loginSec.style.display ='inline';
+            }
+
+        }
+         if(info){
+            if(regSec){
+                info.style.display ='none';
+            }
+        }
+
+    }
+
+    function callTwoFactorEP() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            console.log(xhr.readyState);
+            console.log(xhr.status);
+            if (xhr.readyState == 4 && xhr.status == 200) {      
+                var infoToken = document.getElementById("lblToken");
+                var data = xhr.responseText;
+                
+                if(data == "success"){                    
+                    infoToken.innerText = "A token is sent to the registered mobile number ending with ***" + userInfo.Mobile.substring(userInfo.Mobile.length-3);
+                    infoToken.style.color = "green";
+                }
+                else{
+                    infoToken.innerText = "An error occured while trying to send token to the mobile number ending with *** " + userInfo.Mobile.substring(userInfo.Mobile.length-3) + "; "+data;
+                    infoToken.style.color = "red";
+                }
+            }
+
+            // end of state change: it can be after some time (async)
+        };
+        xhr.open("POST", "http://localhost:3000/requestToken", true);
+         xhr.send(JSON.stringify({
+            via: 'sms',
+            phone_number: userInfo.Mobile,
+            country_code: 65,
+            locale : 'en'
+        }));
+    }
+    function registerLogin(){
+         var uName = document.getElementById("regUserName").value;
+        var pass = document.getElementById("regPassword").value;
+        var mobNo = document.getElementById("regMobile").value;
+        if(uName){
+            userInfo.UserName = uName;
+        }
+        if(pass){
+            userInfo.Password= pass;
+        }
+        if(mobNo){
+            userInfo.Mobile= mobNo;
+        }
+        register(false);
+    }
+
+    function verifyToken(){
+        //Verify Token response  here
+        var token = document.getElementById("twilToken");
+        
+        if(token){
+            var tokVal = token.value;
+            userInfo.VerificationCode = tokVal;
+        }
+        var xhr = new XMLHttpRequest();
+        var url = "http://localhost:3000/verifyToken";
+        xhr.open("POST", url, true);
+        xhr.send(JSON.stringify({
+                phone_number: userInfo.Mobile,
+                country_code: 65,
+                code : userInfo.VerificationCode
+            }));
+        
+        
+
+        xhr.onreadystatechange = function () {
+            if (this.readyState != 4) return;
+
+            if (this.status == 200) {
+                var infoToken = document.getElementById("lblToken");
+                var data = this.responseText;
+                if(data == "success"){                    
+                    infoToken.innerText = "Succesfully verified token";
+                    infoToken.style.color = "green";
+                }
+                else{
+                    infoToken.innerText = "Token verification unsuccesfull";
+                    infoToken.style.color = "red";
+                }
+            }
+
+            // end of state change: it can be after some time (async)
+        };
+        
+    }
+
+    </script>
+</head>
+<body>
+    <h1>Twilio Login Page</h1>
+
+    <div id="loginSection">
+        Email:<br>
+        <input type="text" id="UserName"><br>
+        Password:<br>
+        <input type="password" id="Password"><br>
+        <button type="button" onclick="checkLogin()">Login</button><br><br>
+        <div id="newUserInfo">
+            New User <a href="javascript:register(true);">Register Here</a>
+        </div>
+    </div>
+
+    <div id="registrationSection">
+        Email:<br>
+        <input type="text" id="regUserName"><br>
+        Password:<br><input type="password" id="regPassword"><br>
+        CountryCode:<br><input type="text" id="regcntryCode" value="65"disabled="true"><br>        
+        Mobile:<br><input type="text" id="regMobile"><br>
+        <button type="button" onclick="registerLogin()">Register</button>
+    </div>
+
+    <div style="display:none" id="twoFactorSection">
+        <label id="lblToken"></label><br>
+        Verify Token:<br>
+        <input type="text" id="twilToken"><br>
+        <button type="button" onclick="verifyToken()">Verify</button>
+        <div>
+
+</body>
+</html> 

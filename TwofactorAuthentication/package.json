@@ -1,0 +1,14 @@
+{
+  "name": "twofactoauth",
+  "version": "1.0.0",
+  "description": "two factor auth cordinator",
+  "main": "AccessService.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rakesh Manhapra",
+  "license": "ISC",
+  "devDependencies": {
+    "http": "0.0.0"
+  }
+}
