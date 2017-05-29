@@ -1,7 +1,7 @@
 const http = require('http');
 const https = require('https');
 const port = 3000;
-const API_KEY = "1dF5EOyJBwwkzS945Njfm3r6ssGHUYZV";
+const API_KEY = "XXXXXXXXXX";
 
 
 function getToken(reqBody,response) {
